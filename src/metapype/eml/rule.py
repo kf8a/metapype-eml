@@ -69,6 +69,7 @@ def load_rules():
 
 rules_dict = load_rules()
 
+
 class Rule(object):
     """
     The Rule class holds rule content for a specific rule as well as the logic for
@@ -77,24 +78,12 @@ class Rule(object):
 
     def __init__(self, rule_name):
         self._name = rule_name
-        print(rule_name)
         rule_data = rules_dict[rule_name]
-        # rule_data = self.convert_rule_to_dict(rules_dict[rule_name])
-        print(rule_data)
-
-        self._attributes = self.convert_rule_to_dict(rule_data[0])
+        self._attributes = rule_data[0]
         self._children = rule_data[1]
         self._content = rule_data[2]
         self._rule_children_names = self._get_rule_children_names(self._children)
         self._depth = 0
-
-    @staticmethod
-    def convert_rule_to_dict(rules: dict ):
-        my_rules = {}
-        for r in rules:
-            temp = list(r.items())[0]
-            my_rules[temp[0]] = temp[1]
-        return my_rules
 
     @staticmethod
     def child_list_node_names(child_list: list):
@@ -656,8 +645,8 @@ class Rule(object):
             MetapypeRuleError: Illegal child, bad sequence or choice, missing
             child, or wrong child cardinality
         """
-        self._node = node # Q: Store the current node whose children are to be validated?
-        self._node_children_names = [] # List of child names of the node
+        self._node = node
+        self._node_children_names = []
         self._node_index = 0
 
         if self._node.name == names.METADATA:
@@ -670,7 +659,6 @@ class Rule(object):
                     errs.append((ValidationError.MAX_OCCURRENCE_EXCEEDED, msg, self._node))
 
         else:
-            # store the names of the node.children into the node_children_name list
             for node_child in self._node.children:
                 self._node_children_names.append(node_child.name)
 
@@ -683,8 +671,6 @@ class Rule(object):
                     else:
                         errs.append((ValidationError.CHILD_NOT_ALLOWED, msg, self._node, node_child_name))
 
-            # self._children are the rule children rules_dict
-            # check if the rules children are supposed to be a sequence or a choice of
             if len(self._children) > 0:
                 # Begin validation of children
                 modality = Rule._get_children_modality(self._children)
@@ -693,7 +679,6 @@ class Rule(object):
                 else:
                     self._validate_choice(self._children, is_mixed_content, errs)
 
-            # _node_index is not always 0 because object oriented It get's modified later hopefully at the right time
             if self._node_index != len(self._node_children_names):
                 msg = (
                     f"Child '{self._node_children_names[self._node_index]}' "
